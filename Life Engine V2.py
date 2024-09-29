@@ -14,6 +14,19 @@ img = Image.new("1", (20,20))
 data = [0]*400
 img.putdata(data, 1, 0)
 
+running = False
+
+def startstop():
+    global running
+    
+    if running == False:
+        startStop.configure(bg="green")
+        running = True
+        step()
+    else:
+        startStop.configure(bg="red")
+        running = False
+
 def render(image):
     global tkimg
 
@@ -36,6 +49,12 @@ def click(event):
     img.putpixel((math.floor(event.x/25), math.floor(event.y/25)), temp)
 
     render(img)
+
+def clear():
+    global img
+
+    img.putdata([0] * 400)
+    render(img)
     
 tkimg = img.resize((500,500))
 tkimg = ImageTk.BitmapImage(tkimg)
@@ -55,58 +74,65 @@ liveLabel.place(x=0, y=525)
 liveEntry = tk.Entry(root)
 liveEntry.place(x=50, y=525)
 
+startStop = tk.Button(root, text="Start/Stop", bg="red", fg="white", command=startstop)
+startStop.place(x=436, y=505)
+
+clear = tk.Button(root, text="Clear", bg="blue", fg="white", command=clear)
+clear.place(x=462, y=531)
+
 def step():
-    swap = []
+    if running:
+        swap = []
 
-    stay = stayEntry.get().split(",")
-    for n in range(len(stay)):
-        if stay[n] != "":
-            stay[n] = int(stay[n])
+        stay = stayEntry.get().split(",")
+        for n in range(len(stay)):
+            if stay[n] != "":
+                stay[n] = int(stay[n])
 
-    live = liveEntry.get().split(",")
-    for n in range(len(live)):
-        if live[n] != "":
-            live[n] = int(live[n])
-    
-    for y in range(0,20):
-        swap.append([])
-        for x in range(0,20):
-            state = img.getpixel((x, y))
-            ngb = 0
-            swap[y].append([0])
+        live = liveEntry.get().split(",")
+        for n in range(len(live)):
+            if live[n] != "":
+                live[n] = int(live[n])
+        
+        for y in range(0,20):
+            swap.append([])
+            for x in range(0,20):
+                state = img.getpixel((x, y))
+                ngb = 0
+                swap[y].append([0])
 
-            try: ngb += img.getpixel((x-1, y)) # L
-            except: pass
-            try: ngb += img.getpixel((x-1, y-1)) # UL
-            except: pass
-            try: ngb += img.getpixel((x, y-1)) # U
-            except: pass
-            try: ngb += img.getpixel((x+1, y-1)) # UR
-            except: pass
-            try: ngb += img.getpixel((x+1, y)) # R
-            except: pass
-            try: ngb += img.getpixel((x+1, y+1)) # DR
-            except: pass
-            try: ngb += img.getpixel((x, y+1)) # D
-            except: pass
-            try: ngb += img.getpixel((x-1, y+1)) # DL
-            except: pass
+                try: ngb += img.getpixel((x-1, y)) # L
+                except: pass
+                try: ngb += img.getpixel((x-1, y-1)) # UL
+                except: pass
+                try: ngb += img.getpixel((x, y-1)) # U
+                except: pass
+                try: ngb += img.getpixel((x+1, y-1)) # UR
+                except: pass
+                try: ngb += img.getpixel((x+1, y)) # R
+                except: pass
+                try: ngb += img.getpixel((x+1, y+1)) # DR
+                except: pass
+                try: ngb += img.getpixel((x, y+1)) # D
+                except: pass
+                try: ngb += img.getpixel((x-1, y+1)) # DL
+                except: pass
 
-            if state == 0 and ngb in live:
-                swap[y][x] = 1
-            elif state == 1 and not(ngb in stay):
-                swap[y][x] = 1
+                if state == 0 and ngb in live:
+                    swap[y][x] = 1
+                elif state == 1 and not(ngb in stay):
+                    swap[y][x] = 1
 
-    for i in range(len(swap)):
-        for j in range(len(swap[0])):
-            state = img.getpixel((j, i))
-            if swap[i][j] == 1 and state == 0:
-                img.putpixel((j,i), 1)
-            elif swap[i][j] == 1 and state == 1:
-                img.putpixel((j,i), 0)
+        for i in range(len(swap)):
+            for j in range(len(swap[0])):
+                state = img.getpixel((j, i))
+                if swap[i][j] == 1 and state == 0:
+                    img.putpixel((j,i), 1)
+                elif swap[i][j] == 1 and state == 1:
+                    img.putpixel((j,i), 0)
 
-    render(img)
-    root.after(1000, step)
+        render(img)
+        root.after(1000, step)
 
 root.after(2000, step)
 
