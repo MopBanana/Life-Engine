@@ -1,4 +1,4 @@
-# Life-Engine
+# Life Engine
 Custom Game of Life engine
 
 Click on cells to toggle - black = live, white = dead
